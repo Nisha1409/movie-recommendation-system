@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* Autofill Styling */
+input:-webkit-autofill {
+    background-color: #1E1E1E !important;
+    -webkit-box-shadow: 0 0 0 1000px #1E1E1E inset !important;
+    -webkit-text-fill-color: white !important;
+    border-radius: 5px;
+    border: none;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+  
+  /* Optional: for dark mode */
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #2A2A2A inset !important;
+    -webkit-text-fill-color: #fff !important;
+  }
+  
