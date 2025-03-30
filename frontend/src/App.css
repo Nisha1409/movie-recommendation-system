@@ -16,4 +16,20 @@ input:-webkit-autofill {
     -webkit-box-shadow: 0 0 0 1000px #2A2A2A inset !important;
     -webkit-text-fill-color: #fff !important;
   }
+
+/* Custom thin horizontal scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 3px; /* Scrollbar thickness */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* Track background */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #4b5563; /* Tailwind gray-700 */
+  border-radius: 10px;
+  padding-bottom: 10px;
+}
+
   

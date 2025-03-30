@@ -51,7 +51,7 @@ const fetchOmdbPoster = async (imdb_id, title) => {
 };
 
 // Fetch recent Bollywood Hindi movies (all platforms)
-const fetchBollywoodMovies = async () => {
+export const fetchBollywoodMovies = async (limit = 20) => {
     try {
         const response = await axios.get(`${WATCHMODE_URL}/list-titles/`, {
             params: {
@@ -59,7 +59,7 @@ const fetchBollywoodMovies = async () => {
                 languages: "hi",
                 types: "movie",
                 sort_by: "release_date_desc",
-                limit: 12,
+                limit,
             },
         });
 
@@ -88,7 +88,7 @@ const fetchBollywoodMovies = async () => {
 };
 
 // Fetch recent Hollywood English movies from Netflix and Amazon
-const fetchHollywoodMovies = async () => {
+export const fetchHollywoodMovies = async (limit=20) => {
     try {
         const response = await axios.get(`${WATCHMODE_URL}/list-titles/`, {
             params: {
@@ -126,7 +126,7 @@ const fetchHollywoodMovies = async () => {
 };
 
 // Fetch and mix Bollywood and Hollywood movies by release date
-export const fetchMixedMovies = async () => {
+export const fetchMixedMovies = async (limit=25) => {
     try {
         const [bollywoodMovies, hollywoodMovies] = await Promise.all([
             fetchBollywoodMovies(),
@@ -156,4 +156,3 @@ export const fetchMixedMovies = async () => {
         return [];
     }
 };
-

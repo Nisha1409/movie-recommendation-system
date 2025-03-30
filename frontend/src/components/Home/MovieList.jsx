@@ -1,36 +1,57 @@
 import React, { useEffect, useState } from "react";
-import { fetchMoviesByGenre } from "../../api/omdb";
+import { fetchBollywoodMovies, fetchHollywoodMovies } from "../../api/watchMode";
+import MovieCard from "./MovieCard";
+// import { fetchMoviesByGenre } from "../../api/omdb";
 
 const MovieList = () => {
     const [horrorMovies, setHorrorMovies] = useState([]);
     const [comedyMovies, setComedyMovies] = useState([]);
     const [actionMovies, setActionMovies] = useState([]);
+    const [bollywoodMovies, setBollywoodMovies] = useState([]);
+    const [hollywoodMovies, setHollywoodMovies] = useState([]);
 
     useEffect(() => {
         const fetchMovies = async () => {
-            setHorrorMovies(await fetchMoviesByGenre("horror"));
-            setComedyMovies(await fetchMoviesByGenre("comedy"));
-            setActionMovies(await fetchMoviesByGenre("action"));
+            try {
+    
+                // Fetch all movies from Watchmode
+                const bollywoodMovies = await fetchBollywoodMovies(40);
+                setBollywoodMovies(bollywoodMovies);
+                const hollywoodMovies = await fetchHollywoodMovies(40);
+                setHollywoodMovies(hollywoodMovies);
+                console.log("Bollywood Movies:", bollywoodMovies);
+                console.log("Hollywood Movies:", hollywoodMovies);
+                
+    
+            } catch (error) {
+                console.error("Error fetching movies:", error);
+            }
         };
         fetchMovies();
     }, []);
+    
 
     return (
-        <div>
-            <h2>Horror Movies</h2>
-            {horrorMovies.map((movie) => (
-                <p key={movie.imdbID}>{movie.Title}</p>
-            ))}
+        <div className="movie-list-container">
+            {/* Horror Movies */}
+            <h2 className="text-xl font-bold text-red-500">Horror Movies</h2>
+            <MovieCard movies={horrorMovies} />
 
-            <h2>Comedy Movies</h2>
-            {comedyMovies.map((movie) => (
-                <p key={movie.imdbID}>{movie.Title}</p>
-            ))}
+            {/* Comedy Movies */}
+            <h2 className="text-xl font-bold text-yellow-500 mt-6">Comedy Movies</h2>
+            <MovieCard movies={comedyMovies} />
 
-            <h2>Action Movies</h2>
-            {actionMovies.map((movie) => (
-                <p key={movie.imdbID}>{movie.Title}</p>
-            ))}
+            {/* Action Movies */}
+            <h2 className="text-xl font-bold text-blue-500 mt-6">Action Movies</h2>
+            <MovieCard movies={actionMovies} />
+
+            {/* Bollywood Movies (Hindi) */}
+            <h2 className="text-xl font-bold text-green-500 mt-6">Bollywood Movies (Hindi)</h2>
+            <MovieCard movies={bollywoodMovies} />
+
+            {/* Hollywood Movies (English, Netflix, Amazon) */}
+            <h2 className="text-xl font-bold text-purple-500 mt-6">Hollywood Movies (Netflix, Amazon)</h2>
+            <MovieCard movies={hollywoodMovies} />
         </div>
     );
 };
