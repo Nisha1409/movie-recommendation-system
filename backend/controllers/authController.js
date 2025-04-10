@@ -38,6 +38,7 @@ export const signupUser = async (req, res) => {
                 _id: user._id,
                 username: user.username,
                 email: user.email,
+                createdAt: user.createdAt,
                 token: generateToken(user._id),
             });
         } else {
@@ -72,6 +73,7 @@ export const loginUser = async (req, res) => {
             _id: user._id,
             username: user.username,
             email: user.email,
+            createdAt: user.createdAt,
             token: generateToken(user._id),
         });
     } catch (error) {

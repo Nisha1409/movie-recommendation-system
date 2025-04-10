@@ -17,6 +17,7 @@ const Login = () => {
       const response = await axios.post("/auth/login", { email, password });
       if (response.status === 200) {
         localStorage.setItem("userToken", response.data.token);
+        localStorage.setItem("userInfo", JSON.stringify(response.data)); // Save full user data
         navigate("/home");
       }
     } catch (error) {

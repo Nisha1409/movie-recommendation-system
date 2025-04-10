@@ -34,6 +34,7 @@ const Sidebar = () => {
     // Logout function
     const handleLogout = () => {
         localStorage.removeItem("userToken");
+        localStorage.removeItem("userInfo"); // Remove user info from local storage
         setIsLoggedIn(false); // Immediately update state
         navigate("/");
     };
