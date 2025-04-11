@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { FiSearch } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
@@ -7,8 +6,9 @@ import { useMovies } from "../../context/MovieContext";
 const SearchBar = () => {
   const [query, setQuery] = useState("");
   const [placeholder, setPlaceholder] = useState("Search for movies...");
-  const { searchMovies } = useMovies();
   const navigate = useNavigate();
+
+  const { handleSearch } = useMovies();
 
   useEffect(() => {
     const handleResize = () => {
@@ -19,16 +19,17 @@ const SearchBar = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleSearch = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     if (!query.trim()) return;
-    const results = await searchMovies(query.trim());
-    navigate("/search", { state: { query, results } });
+
+    await handleSearch(query); // Call handleSearch from context
+    navigate("/search"); // Navigate to SearchResults page
   };
 
   return (
     <form
-      onSubmit={handleSearch}
+      onSubmit={onSubmit}
       className="flex items-center justify-center w-full my-8 sm:px-6 md:px-8"
       style={{ marginTop: "80px", zIndex: 1 }}
     >

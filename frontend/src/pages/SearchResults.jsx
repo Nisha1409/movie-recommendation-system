@@ -8,16 +8,25 @@ const SearchResults = () => {
   const navigate = useNavigate();
   const { searchResults, searchQuery } = useMovies();
 
-  const localResults = location.state?.results || searchResults;
-  const localQuery = location.state?.query || searchQuery;
+  console.log("Search Query from Context:", searchQuery); // Debugging log
+  console.log("Search Results from Context:", searchResults); // Debugging log
 
-  // 🧠 Remove duplicate movies based on unique 'id' or 'title'
+  // Prefer route state (if freshly navigated) otherwise fallback to global context
+  const results = location.state?.results || searchResults || [];
+  const query = location.state?.query || searchQuery || "";
+
+  console.log("Final Results:", results); // Debugging log
+  console.log("Final Query:", query); // Debugging log
+
+  // Remove duplicate movies by 'id' or 'title'
   const uniqueResults = Array.from(
-    new Map(localResults.map(movie => [movie.id || movie.title, movie])).values()
+    new Map(results.map((movie) => [movie.id || movie.title, movie])).values()
   );
+  console.log("Unique Results:", uniqueResults); // Debugging log
 
   return (
     <div className="min-h-screen bg-black text-white px-4 py-6">
+      {/* 🔙 Back Button */}
       <div className="mb-4">
         <button
           onClick={() => navigate("/")}
@@ -27,10 +36,12 @@ const SearchResults = () => {
         </button>
       </div>
 
+      {/* 🔎 Query Title */}
       <h2 className="text-2xl font-bold mb-4">
-        {localQuery ? `Results for "${localQuery}"` : "Search Results"}
+        {query ? `Results for "${query}"` : "Search Results"}
       </h2>
 
+      {/* 🎬 Movie Results or Empty Message */}
       {uniqueResults.length > 0 ? (
         <MovieCard movies={uniqueResults} />
       ) : (

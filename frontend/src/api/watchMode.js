@@ -149,36 +149,60 @@ export const fetchMixedMoviesByDate = async (limit = 20) => {
 
 // 🔍 Exported search method (optional)
 export const fetchMovieBySearch = async (query) => {
+  // console.log("fetchMovieBySearch called with query:", query); // Debugging log
   if (!query) return [];
 
   try {
+    const normalizedQuery = query.trim().toLowerCase();
     const response = await axios.get(`${WATCHMODE_URL}/autocomplete-search/`, {
       params: {
         apiKey: WATCHMODE_KEY,
-        search_value: query,
-        search_type: "movie",
+        search_value: normalizedQuery,
+        search_type: 1,
       },
     });
 
     const titles = response.data.results || [];
+    console.log(`Autocomplete Search Response for "${query}":`, titles);
+
+    if (titles.length === 0) {
+      console.warn("No titles found for query:", query);
+      return [];
+    }
+
     const detailedResults = [];
 
     for (const item of titles.slice(0, 5)) {
-      const detailsRes = await axios.get(`${WATCHMODE_URL}/title/${item.id}/details/`, {
-        params: { apiKey: WATCHMODE_KEY },
-      });
+      try {
+        // console.log("Processing title:", item); // Debugging log
 
-      const poster = await fetchMoviePoster(item.imdb_id, item.name || item.title);
-      detailedResults.push({
-        ...detailsRes.data,
-        poster,
-        title: detailsRes.data.title,
-        release_date: detailsRes.data.release_date || "1900-01-01",
-      });
+        if (!item.id) {
+          console.warn(`Skipping invalid title with no ID:`, item);
+          continue;
+        }
 
-      await delay(300);
+        const detailsRes = await axios.get(`${WATCHMODE_URL}/title/${item.id}/details/`, {
+          params: { apiKey: WATCHMODE_KEY },
+        });
+        console.log("Fetched details for title ID:", item.id, detailsRes.data);
+
+        const poster = await fetchMoviePoster(item.imdb_id, item.name || item.title);
+        console.log("Fetched poster for title:", item.title, poster);
+
+        detailedResults.push({
+          ...detailsRes.data,
+          poster,
+          title: detailsRes.data.title,
+          release_date: detailsRes.data.release_date || "1900-01-01",
+        });
+      } catch (err) {
+        console.error(`Error fetching details for title ID ${item.id}:`, err.message);
+      }
+
+      await delay(500);
     }
 
+    console.log("Final Detailed Results:", detailedResults);
     return detailedResults;
   } catch (err) {
     console.error("Error in fetchMovieBySearch:", err.message);

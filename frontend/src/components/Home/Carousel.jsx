@@ -29,6 +29,7 @@ const TrendingCarousel = ({ movies }) => {
 
 
                 {movies?.map((movie, index) => (
+                    // console.log(movie),
                     <div
                         key={index}
                         onClick={() => handleClick(movie)}
