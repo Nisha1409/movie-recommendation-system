@@ -199,7 +199,7 @@ export const fetchMovieBySearch = async (query) => {
         console.error(`Error fetching details for title ID ${item.id}:`, err.message);
       }
 
-      await delay(500);
+      await delay(300);
     }
 
     console.log("Final Detailed Results:", detailedResults);

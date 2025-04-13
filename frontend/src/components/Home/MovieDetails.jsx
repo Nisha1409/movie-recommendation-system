@@ -8,7 +8,7 @@ import { BsHeart, BsHeartFill } from "react-icons/bs";
 const YOUTUBE_API_KEY = process.env.REACT_APP_YOUTUBE_KEY;
 
 const MovieDetails = () => {
-    const { selectedMovie } = useMovies();
+    const { selectedMovie, addToWatchHistory } = useMovies();
 
     const { likedMovies, toggleLike } = useMovies();
     const { id } = useParams();
@@ -55,6 +55,7 @@ const MovieDetails = () => {
 
     const openTrailerInNewTab = () => {
         if (!trailerUrl) return;
+        addToWatchHistory(selectedMovie);
         const videoId = trailerUrl.split("embed/")[1];
         const autoplayUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
 

@@ -30,8 +30,14 @@ export const MovieProvider = ({ children }) => {
   const [searchedQueries, setSearchedQueries] = useState(new Map()); // Cache for search queries
 
   const [loading, setLoading] = useState(true);
+
   const [likedMovies, setLikedMovies] = useState(() => {
     const stored = localStorage.getItem("likedMovies");
+    return stored ? JSON.parse(stored) : [];
+  });
+
+  const [watchHistory, setWatchHistory] = useState(() => {
+    const stored = localStorage.getItem("watchHistory");
     return stored ? JSON.parse(stored) : [];
   });
 
@@ -43,6 +49,17 @@ export const MovieProvider = ({ children }) => {
         ? prev.filter((m) => m.id !== movie.id)
         : [...prev, movie];
       localStorage.setItem("likedMovies", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // Add a movie to watch history
+  const addToWatchHistory = (movie) => {
+    setWatchHistory((prev) => {
+      // Avoid duplicates in watch history
+      if (prev.some((m) => m.id === movie.id)) return prev;
+      const updated = [...prev, { ...movie, watchedAt: new Date() }];
+      localStorage.setItem("watchHistory", JSON.stringify(updated));
       return updated;
     });
   };
@@ -127,6 +144,9 @@ export const MovieProvider = ({ children }) => {
         actionMovies,
         likedMovies,
         toggleLike,
+        watchHistory,
+        setWatchHistory, // Expose setWatchHistory here
+        addToWatchHistory,
         selectedMovie,
         setSelectedMovie,
         loading,

@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useMovies } from "../../context/MovieContext";
 import { useNavigate } from "react-router-dom";
-
+import { FaTimes } from "react-icons/fa"; // Import cross icon
 
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({ username: "", email: "" });
-  const { likedMovies } = useMovies();
+  const { likedMovies, watchHistory, setWatchHistory } = useMovies(); // Import setWatchHistory
   const navigate = useNavigate();
+
   useEffect(() => {
     const storedUser = localStorage.getItem("userInfo");
     if (storedUser) {
@@ -28,6 +29,19 @@ const Profile = () => {
     setUser(updatedUser);
     localStorage.setItem("userInfo", JSON.stringify(updatedUser));
     setEditMode(false);
+  };
+
+  // Function to clear all watch history
+  const clearWatchHistory = () => {
+    setWatchHistory([]);
+    localStorage.removeItem("watchHistory");
+  };
+
+  // Function to remove a single movie from watch history
+  const removeFromWatchHistory = (movieId) => {
+    const updatedHistory = watchHistory.filter((movie) => movie.id !== movieId);
+    setWatchHistory(updatedHistory);
+    localStorage.setItem("watchHistory", JSON.stringify(updatedHistory));
   };
 
   return (
@@ -63,10 +77,12 @@ const Profile = () => {
         </h2>
 
         {/* Section 1: User Info */}
-        <div className="bg-black rounded-lg p-6 shadow-lg flex flex-col sm:flex-row gap-6 sm:items-center" style={{
-          background: "linear-gradient(135deg, #0d0d0d, #1a1a1a)",
-        }}>
-
+        <div
+          className="bg-black rounded-lg p-6 shadow-lg flex flex-col sm:flex-row gap-6 sm:items-center"
+          style={{
+            background: "linear-gradient(135deg, #0d0d0d, #1a1a1a)",
+          }}
+        >
           {/* Avatar */}
           <div className="flex-shrink-0 flex items-center justify-center">
             <img
@@ -75,8 +91,6 @@ const Profile = () => {
               className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-gray-700 object-cover"
             />
           </div>
-
-
 
           {/* Info + Edit */}
           <div className="w-full space-y-4">
@@ -145,9 +159,12 @@ const Profile = () => {
         </div>
 
         {/* Section 2: Liked Movies */}
-        <div className="bg-black rounded-lg p-6 shadow-md" style={{
-          background: "linear-gradient(135deg, #0d0d0d, #1a1a1a)", // consistent soft black
-        }}>
+        <div
+          className="bg-black rounded-lg p-6 shadow-md"
+          style={{
+            background: "linear-gradient(135deg, #0d0d0d, #1a1a1a)", // consistent soft black
+          }}
+        >
           <h3 className="text-2xl font-semibold mb-4 border-b border-gray-700 pb-2">
             ❤️ Liked Movies
           </h3>
@@ -159,7 +176,11 @@ const Profile = () => {
                   className="bg-[#121212] p-2 rounded text-center cursor-pointer hover:scale-105 transition"
                   onClick={() => navigate(`/movie/${movie.id}`)}
                 >
-                  <img src={movie.poster} alt={movie.title} className="w-full h-40 object-cover rounded mb-2" />
+                  <img
+                    src={movie.poster}
+                    alt={movie.title}
+                    className="w-full h-40 object-cover rounded mb-2"
+                  />
                   <div className="text-sm">{movie.title}</div>
                 </div>
               ))
@@ -167,22 +188,62 @@ const Profile = () => {
               <div className="text-gray-400">No liked movies yet.</div>
             )}
           </div>
-
         </div>
 
         {/* Section 3: Watch History */}
-        <div className="bg-black rounded-lg p-6 shadow-md" style={{
-          background: "linear-gradient(135deg, #0d0d0d, #1a1a1a)", // consistent soft black
-        }}>
-          <h3 className="text-2xl font-semibold mb-4 border-b border-gray-700 pb-2">
-            ⏱️ Watch History (Last 15 Days)
-          </h3>
-          <ul className="list-disc list-inside space-y-2 text-sm sm:text-base">
-            {/* Replace with actual history */}
-            <li>Avatar (2022) — 1st April</li>
-            <li>Jawaan (2023) — 30th March</li>
-            <li>Batman Begins — 28th March</li>
-          </ul>
+        <div
+          className="bg-black rounded-lg p-6 shadow-md"
+          style={{
+            background: "linear-gradient(135deg, #0d0d0d, #1a1a1a)", // consistent soft black
+          }}
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-2xl font-semibold border-b border-gray-700 pb-2">
+              ⏱️ Watch History
+            </h3>
+            {watchHistory.length > 0 && (
+              <button
+                onClick={clearWatchHistory}
+                className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md text-sm"
+              >
+                Clear All
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {watchHistory.length > 0 ? (
+              watchHistory.map((movie) => (
+                <div
+                  key={movie.id}
+                  className="bg-[#121212] p-2 rounded text-center relative cursor-pointer hover:scale-105 transition"
+                >
+                  <button
+                    onClick={() => removeFromWatchHistory(movie.id)}
+                    className="absolute top-2 right-2 bg-transparent text-white rounded-full p-1 "
+                    title="Remove from Watch History"
+                  >
+                    <FaTimes />
+                  </button>
+                  <img
+                    src={movie.poster}
+                    alt={movie.title}
+                    className="w-full h-40 object-cover rounded mb-2"
+                  />
+                  <div className="text-sm">{movie.title}</div>
+                  <div className="text-xs text-gray-400">
+                    Watched on:{" "}
+                    {new Date(movie.watchedAt).toLocaleDateString("en-US", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-gray-400">No movies watched yet.</div>
+            )}
+          </div>
         </div>
       </div>
     </div>
