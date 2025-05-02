@@ -13,7 +13,7 @@ const placeholderPoster = "https://via.placeholder.com/300x450?text=No+Poster";
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 // 🔍 Fetch poster using OMDB or fallback to Google Custom Search
-const fetchMoviePoster = async (imdb_id, title) => {
+export const fetchMoviePoster = async (imdb_id, title) => {
   if (!title) return placeholderPoster;
 
   try {

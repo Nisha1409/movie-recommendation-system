@@ -19,9 +19,6 @@ const TrendingCarousel = ({ movies }) => {
 
     return (
         <div className="md:p-2">
-            <h2 className="text-2xl sm:text-3xl font-extrabold bg-clip-text mb-4 font-[Poppins]">
-                On Trend 🔥
-            </h2>
             <div
                 className="w-full overflow-x-auto whitespace-nowrap md:p-1 scroll-smooth scroll-snap-x snap-mandatory
                scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent custom-scrollbar"

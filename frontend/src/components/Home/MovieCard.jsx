@@ -26,6 +26,7 @@ const MovieCard = ({ movies }) => {
                 {moviesToShow.map((movie, index) => (
                     // console.log(movie.sources),
                     // console.log(movie.genre_names),
+                    // console.log(movie),
                     <div
                         key={index}
                         onClick={() => handleClick(movie)} // ✅ Pass movie to handleClick
@@ -40,10 +41,8 @@ const MovieCard = ({ movies }) => {
                             {movie.title || "Title"}
                         </h3>
                         <p className="text-gray-400 text-sm">{movie.genre_names?.join(", ") || "Genre: N/A"}</p>
-                        <p className="text-gray-400 text-sm">{movie.sources && movie.sources.length > 0
-                            ? `Platforms: ${movie.sources.map(source => source.name).join(", ")}`
-                            : "Platform: N/A"}</p>
-                        <p className="text-gray-400 text-sm">{movie.original_language || "Language: N/A"}</p>
+                        
+                        <p className="text-gray-400 text-sm">Language: {movie.original_language === "hi" ? "Hindi" : movie.original_language  === "en" ? "English" : movie.original_language|| "Unknown"}</p>
                     </div>
                 ))}
             </div>
