@@ -60,8 +60,8 @@ def recommend_movies(user_liked_movies, user_watch_history, top_n=10):
             (df['imdb_rating'] >= 7.5) &
             (df['release_year'] >= 2015) &
             df['genres'].apply(match_genres)
-        ]
-
+        ].sort_values(by='release_date', ascending=False)
+    
         if recommendations.empty:
             print("⚠️ No genre-based matches, using fallback recommendations.")
             recommendations = df.sort_values(by='vote_average', ascending=False).head(top_n)

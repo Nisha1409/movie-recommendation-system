@@ -28,7 +28,7 @@ def load_dataset():
 
     # ✅ New Filters: Recent movies with IMDb rating above 7.5
     df = df[(df['imdb_rating'] >= 7.5) & (df['release_year'] >= 2015)]
-
+    df = df.sort_values(by='release_date', ascending=False)
     print(f"Filtered dataset: {df.shape[0]} movies after applying rating & date constraints.")
     return df
 
