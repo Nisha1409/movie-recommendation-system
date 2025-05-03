@@ -8,7 +8,7 @@ import {
   fetchHorrorMovies,
   fetchActionMovies,
   fetchComedyMovies,
-  fetchMovieBySearch, 
+  fetchMovieBySearch,
   fetchMoviePoster // ✅ Ensure this function exists
 } from "../api/watchMode";
 
@@ -65,6 +65,38 @@ export const MovieProvider = ({ children }) => {
       return updated;
     });
   };
+
+  useEffect(() => {
+    const loadMovies = async () => {
+      try {
+        console.log("🔄 Fetching movie categories...");
+        setLoading(true);
+        const bollywoodPopularityData = await fetchBollywoodMoviesByPopularity();
+        const bollywoodDateData = await fetchBollywoodMoviesByDate();
+        const mixedMoviesData = await fetchMixedMoviesByDate();
+        const hollywoodDateData = await fetchHollywoodMoviesByDate();
+        const hollywoodPopularityData = await fetchHollywoodMoviesByPopularity();
+        const horrorMoviesData = await fetchHorrorMovies();
+        const comedyMoviesData = await fetchComedyMovies();
+        const actionMoviesData = await fetchActionMovies();
+        setBollywoodMoviesPopularity(bollywoodPopularityData);
+        setHollywoodMoviesPopularity(hollywoodPopularityData);
+        setHollywoodMoviesDate(hollywoodDateData);
+        setBollywoodMoviesDate(bollywoodDateData);
+        setMixedMoviesDate(mixedMoviesData);
+        setHorrorMovies(horrorMoviesData);
+        setComedyMovies(comedyMoviesData);
+        setActionMovies(actionMoviesData);
+        console.log("✅ Movie categories fetched successfully!");
+        setLoading(false);
+      }
+      catch (error) {
+        console.error("❌ Error fetching category movies:", error);
+        setLoading(false);
+      }
+    };
+    loadMovies();
+  }, []);
 
   const fetchRecommendations = async () => {
     if (!likedMovies.length && !watchHistory.length) {

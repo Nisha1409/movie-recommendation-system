@@ -46,20 +46,6 @@ const MovieCard = ({ movies }) => {
                     </div>
                 ))}
             </div>
-
-            {/* Show More Button */}
-            {visibleCount < movies.length && (
-                <div className="flex items-center justify-center my-6">
-                    <hr className="flex-grow border-t border-gray-600" />
-                    <button
-                        onClick={() => setVisibleCount(visibleCount + 12)} // ✅ Increase count
-                        className="px-5 py-2 mx-4 text-white bg-white/5 backdrop-blur-md border border-gray-700 rounded-lg hover:bg-white/10 transition"
-                    >
-                        Show More
-                    </button>
-                    <hr className="flex-grow border-t border-gray-600" />
-                </div>
-            )}
         </div>
     );
 };

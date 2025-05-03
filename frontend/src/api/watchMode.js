@@ -4,6 +4,7 @@ const WATCHMODE_KEY = process.env.REACT_APP_WATCHMODE_KEY;
 const OMDB_KEY = process.env.REACT_APP_OMDB_API_KEY;
 const GOOGLE_CSE_KEY = process.env.REACT_APP_GOOGLE_CSE_API_KEY;
 const GOOGLE_CX = process.env.REACT_APP_GOOGLE_CSE_CX;
+const WIKIPEDIA_URL = "https://en.wikipedia.org/api/rest_v1/page/media-list/";
 
 const WATCHMODE_URL = "https://api.watchmode.com/v1";
 const OMDB_URL = "https://www.omdbapi.com/";
@@ -12,39 +13,83 @@ const GOOGLE_CSE_URL = "https://www.googleapis.com/customsearch/v1";
 const placeholderPoster = "https://via.placeholder.com/300x450?text=No+Poster";
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
-// 🔍 Fetch poster using OMDB or fallback to Google Custom Search
+
+
+// 🔍 Fetch poster using Google Custom Search (First Priority)
+const fetchGooglePoster = async (title) => {
+  try {
+    const response = await axios.get(GOOGLE_CSE_URL, {
+      params: { key: GOOGLE_CSE_KEY, cx: GOOGLE_CX, q: `${title} movie poster`, searchType: "image", num: 1 },
+    });
+
+    return response.data.items?.[0]?.link || null;
+  } catch (err) {
+    console.error(`❌ Error fetching Google poster for ${title}:`, err.message);
+    return null;
+  }
+};
+
+// 🔍 Fetch poster using Wikipedia (Second Priority)
+const fetchWikipediaPoster = async (title) => {
+  try {
+    const response = await axios.get(`${WIKIPEDIA_URL}${encodeURIComponent(title)}`);
+    return response.data.items?.find(item => item.type === "image")?.src || null;
+  } catch (err) {
+    console.error(`❌ Error fetching Wikipedia poster for ${title}:`, err.message);
+    return null;
+  }
+};
+
+// 🔍 Fetch poster using OMDB (Third Priority)
+const fetchOMDBPoster = async (imdb_id) => {
+  try {
+    const response = await axios.get(OMDB_URL, { params: { i: imdb_id, apikey: OMDB_KEY } });
+
+    return response.data.Poster !== "N/A" ? response.data.Poster : null;
+  } catch (err) {
+    console.error(`❌ Error fetching OMDB poster for IMDb ID ${imdb_id}:`, err.message);
+    return null;
+  }
+};
+
+// 🔍 Fetch poster using Watchmode (Last Priority)
+const fetchWatchmodePoster = async (imdb_id) => {
+  try {
+    const response = await axios.get(`${WATCHMODE_URL}/title/${imdb_id}/details/`, {
+      params: { apiKey: WATCHMODE_KEY },
+    });
+
+    return response.data.poster || null;
+  } catch (err) {
+    console.error(`❌ Error fetching Watchmode poster for IMDb ID ${imdb_id}:`, err.message);
+    return null;
+  }
+};
+
+// 🎬 Unified Poster Fetching Function (Google → Wikipedia → OMDB → Watchmode)
 export const fetchMoviePoster = async (imdb_id, title) => {
   if (!title) return placeholderPoster;
 
-  try {
-    // Try OMDB first
-    if (imdb_id) {
-      const omdbRes = await axios.get(OMDB_URL, {
-        params: { i: imdb_id, apikey: OMDB_KEY },
-      });
+  // 1️⃣ Try Google Custom Search First
+  const googlePoster = await fetchGooglePoster(title);
+  if (googlePoster) return googlePoster;
 
-      if (omdbRes.data.Poster && omdbRes.data.Poster !== "N/A") {
-        return omdbRes.data.Poster;
-      }
-    }
+  // 2️⃣ Try Wikipedia Next
+  const wikiPoster = await fetchWikipediaPoster(title);
+  if (wikiPoster) return wikiPoster;
 
-    // Fallback to Google Custom Search
-    const googleRes = await axios.get(GOOGLE_CSE_URL, {
-      params: {
-        key: GOOGLE_CSE_KEY,
-        cx: GOOGLE_CX,
-        q: `${title} movie poster`,
-        searchType: "image",
-        num: 1,
-      },
-    });
+  // 3️⃣ Try OMDB Using IMDb ID
+  const omdbPoster = await fetchOMDBPoster(imdb_id);
+  if (omdbPoster) return omdbPoster;
 
-    return googleRes.data.items?.[0]?.link || placeholderPoster;
-  } catch (err) {
-    console.error(`Poster fetch failed for ${title}:`, err.message);
-    return placeholderPoster;
-  }
+  // 4️⃣ Try Watchmode as a Last Resort
+  const watchmodePoster = await fetchWatchmodePoster(imdb_id);
+  if (watchmodePoster) return watchmodePoster;
+
+  // 🛑 No valid poster found, use placeholder
+  return placeholderPoster;
 };
+
 
 // 🧠 Generic fetch function
 const fetchMovies = async ({ genre, languages, source_ids, sort_by = "popularity_desc", limit = 20 }) => {

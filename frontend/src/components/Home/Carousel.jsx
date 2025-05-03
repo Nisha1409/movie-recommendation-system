@@ -20,28 +20,23 @@ const TrendingCarousel = ({ movies }) => {
     return (
         <div className="md:p-2">
             <div
-                className="w-full overflow-x-auto whitespace-nowrap md:p-1 scroll-smooth scroll-snap-x snap-mandatory
-               scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent custom-scrollbar"
+                className="w-full overflow-x-auto whitespace-nowrap scroll-smooth scroll-snap-x snap-mandatory
+               scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent custom-scrollbar flex gap-2"
             >
-
-
-                {movies?.map((movie, index) => (
-                    // console.log(movie),
+                {movies.map((movie, index) => (
                     <div
                         key={index}
                         onClick={() => handleClick(movie)}
-                        className="p-2 inline-block snap-start"
+                        className="p-2 inline-block snap-start w-32 sm:w-40 md:w-48 lg:w-10rem flex-shrink-0 flex flex-col items-center"
                     >
-                            <img
-                                src={movie.poster}
-                                alt={movie.title}
-                                className="
-                            object-cover rounded-lg mx-1
-                            aspect-[2/3] 
-                            shadow-lg hover:scale-105 transition-transform
-                            w-32 sm:w-40 md:w-48 lg:w-10rem"
-                            />
-                        <p className="mt-2 text-center text-sm sm:text-base">{movie.title}</p>
+                        <img
+                            src={movie.poster}
+                            alt={movie.title}
+                            className="object-cover rounded-lg mx-1 aspect-[2/3] shadow-lg hover:scale-105 transition-transform w-full"
+                        />
+                        <p className="mt-2 text-center text-sm sm:text-base w-full h-12 overflow-hidden text-ellipsis whitespace-normal break-words">
+                            {movie.title}
+                        </p>
                     </div>
                 ))}
             </div>
