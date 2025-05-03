@@ -69,6 +69,21 @@ const Profile = () => {
       <div className="max-w-6xl mx-auto space-y-12">
         {/* User Info Section */}
         <h2 className="text-3xl md:text-4xl font-bold text-center border-b border-gray-700 pb-4">User Profile</h2>
+        {/* Section 1: User Info */}
+        <div className="bg-black rounded-lg p-6 shadow-lg flex flex-col sm:flex-row gap-6 sm:items-center" style={{ background: "linear-gradient(135deg, #0d0d0d, #1a1a1a)" }}>
+          <div className="flex-shrink-0 flex items-center justify-center">
+            <img src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.username || "guest"}`} alt="User Avatar" className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-gray-700 object-cover" />
+          </div> {/* Info + Edit */}
+          <div className="w-full space-y-4">
+            <div> <label className="text-gray-400">Full Name</label> {editMode ? (<input name="username" value={formData.username} onChange={handleChange} className="bg-gray-800 text-white p-2 rounded w-full mt-1" />) : (<div className="text-lg sm:text-xl">{user?.username}</div>)}
+            </div>
+            <div> <label className="text-gray-400">Email</label> {editMode ? (<input name="email" value={formData.email} onChange={handleChange} className="bg-gray-800 text-white p-2 rounded w-full mt-1" />) : (<div className="text-lg sm:text-xl">{user?.email}</div>)}
+            </div>
+            <div> <label className="text-gray-400">Joined</label>
+              <div className="text-sm text-gray-300">{new Date(user?.createdAt).toLocaleDateString()}</div>
+            </div>
+          </div>
+        </div>
 
         {/* Liked Movies Section */}
         <div className="bg-black rounded-lg p-6 shadow-md" style={{ background: "linear-gradient(135deg, #0d0d0d, #1a1a1a)" }}>
