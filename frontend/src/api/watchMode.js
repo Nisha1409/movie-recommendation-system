@@ -66,29 +66,52 @@ const fetchWatchmodePoster = async (imdb_id) => {
   }
 };
 
-// 🎬 Unified Poster Fetching Function (Google → Wikipedia → OMDB → Watchmode)
 export const fetchMoviePoster = async (imdb_id, title) => {
   if (!title) return placeholderPoster;
 
+  const normalizedTitle = title.trim().replace(/\s+/g, ' ').toLowerCase();
+  console.log(`🔍 Fetching poster for: ${normalizedTitle} (IMDb ID: ${imdb_id})`);
+
   // 1️⃣ Try Google Custom Search First
-  const googlePoster = await fetchGooglePoster(title);
-  if (googlePoster) return googlePoster;
+  const googlePoster = await fetchGooglePoster(normalizedTitle);
+  if (googlePoster) {
+    console.log(`✅ Google found poster for: ${title}`);
+    return googlePoster;
+  }
 
   // 2️⃣ Try Wikipedia Next
-  const wikiPoster = await fetchWikipediaPoster(title);
-  if (wikiPoster) return wikiPoster;
+  const wikiPoster = await fetchWikipediaPoster(normalizedTitle);
+  if (wikiPoster) {
+    console.log(`✅ Wikipedia found poster for: ${title}`);
+    return wikiPoster;
+  }
 
   // 3️⃣ Try OMDB Using IMDb ID
   const omdbPoster = await fetchOMDBPoster(imdb_id);
-  if (omdbPoster) return omdbPoster;
+  if (omdbPoster) {
+    console.log(`✅ OMDB found poster for: ${title}`);
+    return omdbPoster;
+  }
 
   // 4️⃣ Try Watchmode as a Last Resort
   const watchmodePoster = await fetchWatchmodePoster(imdb_id);
-  if (watchmodePoster) return watchmodePoster;
+  if (watchmodePoster) {
+    console.log(`✅ Watchmode found poster for: ${title}`);
+    return watchmodePoster;
+  }
+
+  // 5️⃣ Fallback to IMDb Direct Image Link
+  const imdbDirectPoster = imdb_id ? `https://m.media-amazon.com/images/M/${imdb_id}.jpg` : null;
+  if (imdbDirectPoster) {
+    console.log(`✅ IMDb Direct found poster for: ${title}`);
+    return imdbDirectPoster;
+  }
 
   // 🛑 No valid poster found, use placeholder
+  console.warn(`⚠️ No poster found for: ${title}, using placeholder`);
   return placeholderPoster;
 };
+
 
 
 // 🧠 Generic fetch function

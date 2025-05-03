@@ -131,14 +131,14 @@ const MovieDetails = () => {
 
                     <div className="flex flex-wrap gap-4 text-sm text-gray-300">
                         <span className="bg-red-600 px-2 py-1 rounded-md text-white">HD 4K</span>
-                        <span>Genre: {selectedMovie.genre || selectedMovie.genre_names?.join(", ") || "Unknown"}</span>
-                        <span>Year: {selectedMovie.year || "N/A"}</span>
-                        <span>Runtime: {selectedMovie.runtime_minutes || "N/A"} mins</span>
+                        <span>Genre: {selectedMovie.genre || selectedMovie.genre_names?.join(", ") || selectedMovie.genres || "Unknown"}</span>
+                        <span>Year: {selectedMovie.year || selectedMovie.release_year|| "N/A"}</span>
+                        <span>Runtime: {selectedMovie.runtime_minutes || selectedMovie.runtime || "N/A"} mins</span>
                         <span>Language: {selectedMovie.original_language === "hi" ? "Hindi" : selectedMovie.original_language === "en" ? "English" : selectedMovie.original_language || "Unknown"}</span>
                     </div>
 
                     <p className="text-gray-200 leading-relaxed">
-                        {selectedMovie.plot_overview || "No description available."}
+                        {selectedMovie.plot_overview || selectedMovie.overview|| "No description available."}
                     </p>
 
                     {/* Rating */}
@@ -146,10 +146,10 @@ const MovieDetails = () => {
                         {[...Array(5)].map((_, i) => (
                             <FaStar
                                 key={i}
-                                className={`text-yellow-400 ${i < Math.round((selectedMovie.user_rating || 0) / 2) ? "" : "opacity-20"}`}
+                                className={`text-yellow-400 ${i < Math.round((selectedMovie.user_rating||selectedMovie.imdb_rating || 0) / 2) ? "" : "opacity-20"}`}
                             />
                         ))}
-                        <span className="ml-2 text-gray-400">{selectedMovie.imdbRating || selectedMovie.user_rating || "N/A"}</span>
+                        <span className="ml-2 text-gray-400">{selectedMovie.imdbRating || selectedMovie.user_rating || selectedMovie.imdb_rating|| "N/A"}</span>
                     </div>
 
                     {/* Watch Trailer */}

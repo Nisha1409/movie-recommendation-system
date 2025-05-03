@@ -74,9 +74,9 @@ def recommend_movies(user_liked_movies, user_watch_history, top_n=10):
         })
 
         # ✅ Debugging check before returning results
-        print(f"🔥 Filtered Recommendations:\n{recommendations[['imdb_id', 'title', 'genres', 'imdb_rating']].head()}")
+        print(f"🔥 Filtered Recommendations:\n{recommendations[['imdb_id', 'title', 'genres', 'imdb_rating','release_year']].head()}")
 
-        return recommendations.head(top_n)[['imdb_id', 'title', 'genres', 'original_language', 'overview', 'imdb_rating', 'runtime']].to_dict(orient='records')
+        return recommendations.head(top_n)[['imdb_id', 'title', 'genres', 'original_language', 'overview', 'imdb_rating', 'runtime','release_year']].to_dict(orient='records')
 
     except Exception as e:
         print(f"❌ Error in recommend_movies: {e}")
@@ -95,13 +95,13 @@ def recommend():
 
         liked_movies = data.get('liked_movies', [])
         watch_history = data.get('watch_history', [])
-        top_n = int(data.get('top_n', 10))
+        top_n = int(data.get('top_n', 20))
 
-        print(f"📌 Processing recommendations for {len(liked_movies)} liked movies & {len(watch_history)} watch history items.")
+        #print(f"📌 Processing recommendations for {len(liked_movies)} liked movies & {len(watch_history)} watch history items.")
 
         recommendations = recommend_movies(liked_movies, watch_history, top_n)
 
-        print(f"🔥 Final API Response Sent: {recommendations}")
+        # print(f"🔥 Final API Response Sent: {recommendations}")
 
         return jsonify(recommendations) if recommendations else jsonify([])  # ✅ Ensure valid JSON response
 
