@@ -14,6 +14,7 @@ import {
 
 const MovieContext = createContext();
 
+const placeholderPoster = "https://via.placeholder.com/300x450?text=No+Poster";
 export const MovieProvider = ({ children }) => {
   const [bollywoodMoviesPopularity, setBollywoodMoviesPopularity] = useState([]);
   const [hollywoodMoviesPopularity, setHollywoodMoviesPopularity] = useState([]);
@@ -100,46 +101,52 @@ export const MovieProvider = ({ children }) => {
 
   const fetchRecommendations = async () => {
     if (!likedMovies.length && !watchHistory.length) {
-      console.warn("⚠️ No liked movies or watch history found. Skipping recommendation fetch.");
-      return;
+        console.warn("⚠️ No liked movies or watch history found. Skipping recommendation fetch.");
+        return;
     }
 
-    console.log("🔄 Fetching recommendations...");
+    console.log("🚀 Sending request to Flask API for dynamic recommendations...");
     setLoadingRecommendations(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/recommend", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          liked_movies: likedMovies,
-          watch_history: watchHistory,
-          top_n: 10,
-        }),
-      });
+        const response = await fetch("http://127.0.0.1:5000/recommend", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                liked_movies: likedMovies,
+                watch_history: watchHistory,
+                top_n: 20,
+            }),
+        });
 
-      if (!response.ok) {
-        throw new Error(`❌ Failed to fetch recommendations: ${response.statusText}`);
-      }
+        if (!response.ok) {
+            throw new Error(`❌ Failed to fetch recommendations: ${response.statusText}`);
+        }
 
-      let data = await response.json();
-      console.log("🔥 API Response:", data);
+        let newRecommendations = await response.json();
+        console.log("🔥 API Response:", newRecommendations);
 
-      // ✅ Fetch posters for each movie using IMDb ID
-      const moviesWithPosters = await Promise.all(data.map(async (movie) => {
-        const posterUrl = await fetchMoviePoster(movie.imdb_id, movie.title);
-        return { ...movie, poster: posterUrl || "https://via.placeholder.com/300x450?text=No+Poster" };
-      }));
+        // ✅ Fetch posters dynamically for newly recommended movies
+        const moviesWithPosters = await Promise.all(newRecommendations.map(async (movie) => {
+            const posterUrl = await fetchMoviePoster(movie.imdb_id, movie.title);
+            console.log(`🎬 Poster for ${movie.title}: ${posterUrl}`);
+            return { ...movie, poster: posterUrl || placeholderPoster };
+        }));
 
-      setRecommendations(moviesWithPosters);
-      console.log("🏆 Updated Recommendations with Posters:", moviesWithPosters);
+        // ✅ Filter out movies with only placeholder posters
+        const filteredRecommendations = moviesWithPosters.filter(movie => movie.poster !== placeholderPoster);
+
+        setRecommendations(filteredRecommendations); // ✅ Always update recommendations dynamically
+        console.log("🏆 Final Recommendations with Posters:", filteredRecommendations);
 
     } catch (error) {
-      console.error("❌ Error fetching recommendations:", error);
+        console.error("❌ Error fetching recommendations:", error);
     } finally {
-      setLoadingRecommendations(false);
+        setLoadingRecommendations(false);
     }
-  };
+};
+
+
 
   useEffect(() => {
     if (likedMovies.length || watchHistory.length) {

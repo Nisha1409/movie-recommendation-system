@@ -66,49 +66,39 @@ const fetchWatchmodePoster = async (imdb_id) => {
   }
 };
 
+const validatePoster = async (posterUrl) => {
+  try {
+    const response = await fetch(posterUrl);
+    return response.ok; // ✅ Returns true if the URL is valid, false if it's 404
+  } catch (err) {
+    console.error("❌ Poster validation error:", err.message);
+    return false;
+  }
+};
+
 export const fetchMoviePoster = async (imdb_id, title) => {
   if (!title) return placeholderPoster;
 
   const normalizedTitle = title.trim().replace(/\s+/g, ' ').toLowerCase();
   console.log(`🔍 Fetching poster for: ${normalizedTitle} (IMDb ID: ${imdb_id})`);
 
-  // 1️⃣ Try Google Custom Search First
-  const googlePoster = await fetchGooglePoster(normalizedTitle);
-  if (googlePoster) {
-    console.log(`✅ Google found poster for: ${title}`);
-    return googlePoster;
+  const sources = [
+    () => fetchGooglePoster(normalizedTitle),
+    () => fetchWikipediaPoster(normalizedTitle),
+    () => fetchOMDBPoster(imdb_id),
+    () => fetchWatchmodePoster(imdb_id),
+    () => (imdb_id ? `https://m.media-amazon.com/images/M/${imdb_id}.jpg` : null)
+  ];
+
+  for (const fetchSource of sources) {
+    const posterUrl = await fetchSource();
+    if (posterUrl && await validatePoster(posterUrl)) {
+      console.log(`✅ Valid poster found for: ${title}`);
+      return posterUrl;
+    }
   }
 
-  // 2️⃣ Try Wikipedia Next
-  const wikiPoster = await fetchWikipediaPoster(normalizedTitle);
-  if (wikiPoster) {
-    console.log(`✅ Wikipedia found poster for: ${title}`);
-    return wikiPoster;
-  }
-
-  // 3️⃣ Try OMDB Using IMDb ID
-  const omdbPoster = await fetchOMDBPoster(imdb_id);
-  if (omdbPoster) {
-    console.log(`✅ OMDB found poster for: ${title}`);
-    return omdbPoster;
-  }
-
-  // 4️⃣ Try Watchmode as a Last Resort
-  const watchmodePoster = await fetchWatchmodePoster(imdb_id);
-  if (watchmodePoster) {
-    console.log(`✅ Watchmode found poster for: ${title}`);
-    return watchmodePoster;
-  }
-
-  // 5️⃣ Fallback to IMDb Direct Image Link
-  const imdbDirectPoster = imdb_id ? `https://m.media-amazon.com/images/M/${imdb_id}.jpg` : null;
-  if (imdbDirectPoster) {
-    console.log(`✅ IMDb Direct found poster for: ${title}`);
-    return imdbDirectPoster;
-  }
-
-  // 🛑 No valid poster found, use placeholder
-  console.warn(`⚠️ No poster found for: ${title}, using placeholder`);
+  console.warn(`⚠️ No valid poster found for: ${title}, using placeholder.`);
   return placeholderPoster;
 };
 
@@ -143,6 +133,12 @@ const fetchMovies = async ({ genre, languages, source_ids, sort_by = "popularity
           : { data: {} };
 
         const poster = await fetchMoviePoster(movie.imdb_id, movie.title);
+
+        // ✅ **Skip movies that only have the placeholder poster**
+        if (poster === placeholderPoster) {
+          console.warn(`🚫 Skipping ${movie.title} due to missing poster.`);
+          continue;
+        }
 
         detailedMovies.push({
           ...detailsRes.data,

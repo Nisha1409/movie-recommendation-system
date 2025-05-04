@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "concurrently": "^9.1.2"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0"
   }
 }

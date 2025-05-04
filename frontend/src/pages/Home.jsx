@@ -61,7 +61,8 @@ const Home = () => {
         )}
       </div>
 
-      {/* Recommended Movies Carousel */}
+        {/* Recommended Movies Carousel */}
+      {userToken && (
       <div className="w-full mt-8">
         <h2 className="text-2xl font-bold mb-4">🎬 Recommended Movies</h2>
         {loadingRecommendations ? (
@@ -72,6 +73,7 @@ const Home = () => {
           <p className="text-gray-400">No recommendations available.</p>
         )}
       </div>
+      )}
 
 
       {/* Movie Categories */}

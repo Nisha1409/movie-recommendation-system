@@ -95,7 +95,7 @@ def recommend():
 
         liked_movies = data.get('liked_movies', [])
         watch_history = data.get('watch_history', [])
-        top_n = int(data.get('top_n', 20))
+        top_n = int(data.get('top_n', 10))
 
         #print(f"📌 Processing recommendations for {len(liked_movies)} liked movies & {len(watch_history)} watch history items.")
 
