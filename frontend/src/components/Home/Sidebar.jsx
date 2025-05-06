@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
-import { Box, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText } from "@mui/material";
-import { Home, Person, Category, LiveTv, Movie, Logout, Menu } from "@mui/icons-material";
+import { useState, useEffect, Fragment } from "react";
+import { Box, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Collapse } from "@mui/material";
+import { Home, Person, Category, Logout, Menu, ExpandLess, ExpandMore } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
     const [showIcon, setShowIcon] = useState(true);
     const [open, setOpen] = useState(false);
+    const [categoriesOpen, setCategoriesOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("userToken"));
     const navigate = useNavigate();
 
-    // Show icon only when scrolled to top
     useEffect(() => {
         const handleScroll = () => {
             setShowIcon(window.scrollY === 0);
@@ -20,49 +20,52 @@ const Sidebar = () => {
         };
     }, []);
 
-    useEffect(() => {
-        const handleStorageChange = () => {
-            setIsLoggedIn(!!localStorage.getItem("userToken"));
-        };
-        window.addEventListener("storage", handleStorageChange);
-        return () => {
-            window.removeEventListener("storage", handleStorageChange);
-        };
-    }, []);
-
-    
-    // Logout function
     const handleLogout = () => {
         localStorage.removeItem("userToken");
-        localStorage.removeItem("userInfo"); // Remove user info from local storage
-        setIsLoggedIn(false); // Immediately update state
+        localStorage.removeItem("userInfo");
+        setIsLoggedIn(false);
         navigate("/");
     };
 
-
-    // Toggle sidebar visibility
     const toggleDrawer = () => {
         setOpen(!open);
     };
 
-    // Handle navigation on clicking menu items
+    const toggleCategories = () => {
+        setCategoriesOpen((prev) => !prev);
+    };
+
     const handleNavigation = (path) => {
         navigate(path);
         setOpen(false);
     };
 
-    // Sidebar Menu Items
+    const scrollHomePage = (length) => {
+        window.scrollBy({
+            top: length, 
+            behavior: "smooth"
+        });
+        setOpen(false);
+    };
+    
     const menuItems = [
         { text: "Home", icon: <Home />, path: "/home" },
         { text: "Profile", icon: <Person />, path: "/profile" },
-        { text: "Categories", icon: <Category />, path: "/categories" },
-        { text: "TV Shows", icon: <LiveTv />, path: "/tvshows" },
-        { text: "Movies", icon: <Movie />, path: "/movies" },
+        {
+            text: "Categories",
+            icon: <Category />,
+            subcategories: [
+                { text: "Horror", scrollLength: 950 },
+                { text: "Comedy", scrollLength: 1800 },
+                { text: "Action", scrollLength: 2630 },
+                { text: "Bollywood", scrollLength: 3450 },
+                { text: "Hollywood", scrollLength: 4230 },
+            ],
+        },
     ];
 
     return (
         <>
-            {/* Hamburger Menu Icon */}
             {showIcon && (
                 <IconButton
                     onClick={toggleDrawer}
@@ -80,7 +83,6 @@ const Sidebar = () => {
                 </IconButton>
             )}
 
-            {/* Sidebar Drawer */}
             <Drawer
                 anchor="left"
                 open={open}
@@ -89,61 +91,65 @@ const Sidebar = () => {
                     sx: {
                         backgroundColor: "#141414",
                         color: "white",
-                        width: { xs: "70vw", sm: "250px" }, // Responsive width
+                        width: { xs: "70vw", sm: "250px" },
                         paddingTop: 2,
                         borderRadius: "0 12px 12px 0",
                     },
                 }}
-                transitionDuration={300} // Smooth transition
+                transitionDuration={300}
             >
-                <Box
-                    sx={{
-                        height: "100%",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                        paddingX: 1,
-                    }}
-                >
+                <Box sx={{ height: "100%", display: "flex", flexDirection: "column", paddingX: 1 }}>
                     <List>
                         {menuItems.map((item) => (
-                            <ListItem
-                                button
-                                key={item.text}
-                                onClick={() => handleNavigation(item.path)}
-                                sx={{
-                                    paddingY: 1.5,
-                                    marginY: 0.5,
-                                    borderRadius: 2,
-                                    "&:hover": { backgroundColor: "#1e1e1e" },
-                                }}
-                            >
-                                <ListItemIcon sx={{ color: "#df0707", minWidth: "35px" }}>
-                                    {item.icon}
-                                </ListItemIcon>
-                                <ListItemText
-                                    primary={item.text}
-                                    primaryTypographyProps={{
-                                        fontSize: "1rem",
-                                        fontWeight: 500,
+                            <Fragment key={item.text}>
+                                <ListItem
+                                    button
+                                    onClick={item.subcategories ? toggleCategories : () => handleNavigation(item.path)}
+                                    sx={{
+                                        paddingY: 1.5,
+                                        marginY: 0.5,
+                                        borderRadius: 2,
+                                        "&:hover": { backgroundColor: "#1e1e1e" },
                                     }}
-                                />
-                            </ListItem>
+                                >
+                                    <ListItemIcon sx={{ color: "#df0707", minWidth: "35px" }}>
+                                        {item.icon}
+                                    </ListItemIcon>
+                                    <ListItemText primary={item.text} />
+                                    {item.subcategories && (categoriesOpen ? <ExpandLess /> : <ExpandMore />)}
+                                </ListItem>
+
+                                {/* Submenu for Categories */}
+                                {item.subcategories && (
+                                    <Collapse in={categoriesOpen} timeout="auto" unmountOnExit>
+                                        <List component="div" disablePadding>
+                                            {item.subcategories.map((sub) => (
+                                                <ListItem
+                                                    button
+                                                    key={sub.text}
+                                                    onClick={() => scrollHomePage(sub.scrollLength)}
+                                                    sx={{ pl: 4 ,
+                                                        cursor:"pointer"}}
+                                                >
+                                                    <ListItemText primary={sub.text} />
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    </Collapse>
+                                )}
+                            </Fragment>
                         ))}
 
-                        {/* Show Logout only if logged in */}
                         {isLoggedIn && (
                             <ListItem
                                 button
-                                key={"Logout"}
                                 onClick={handleLogout}
                                 sx={{
                                     paddingY: 1.5,
                                     height: "50px",
-                                    borderRadius: '10px',
+                                    borderRadius: "10px",
                                     color: "white",
                                     backgroundColor: "#c91c1c",
-                                    // border: "2px solid #a51a1a", // Slight border
                                     marginTop: 5,
                                     "&:hover": { backgroundColor: "#a51a1a" },
                                 }}

@@ -30,7 +30,7 @@ const Home = () => {
 }, [recommendations]);
 
   return (
-    <div className="home-container bg-black text-white min-h-screen flex flex-col items-center justify-start px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
+    <div  className="home-container min-h-screen w-full bg-black text-white flex flex-col items-center justify-start px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
       {/* Login Button */}
       {!userToken && (
         <div className="absolute top-4 right-4">

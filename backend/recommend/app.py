@@ -30,7 +30,7 @@ def load_model():
         return None, None
 
 def recommend_movies(user_liked_movies, user_watch_history, top_n=10):
-    """Generate movie recommendations based on liked movies and watch history."""
+    """Generate movie recommendations based on liked movies, watch history, and original language preference."""
     try:
         similarity_matrix, df = load_model()
         if similarity_matrix is None or df is None:
@@ -42,13 +42,20 @@ def recommend_movies(user_liked_movies, user_watch_history, top_n=10):
             return []
 
         user_genres = set()
+        user_languages = set()
+
         for movie in user_liked_movies + user_watch_history:
             genres = movie.get('genres', [])
             if isinstance(genres, list):
                 genres = [genre_mapping.get(g, str(g)) for g in genres]
             user_genres.update(genres)
 
-        print(f"📌 Extracted User Genres for Filtering: {user_genres}")
+            language = movie.get('original_language', None)
+            if language:
+                user_languages.add(language)
+
+        print(f"📌 Extracted User Genres: {user_genres}")
+        print(f"📌 Extracted User Languages: {user_languages}")
 
         def match_genres(movie_genres):
             if not isinstance(movie_genres, str):
@@ -56,31 +63,34 @@ def recommend_movies(user_liked_movies, user_watch_history, top_n=10):
             movie_genres_list = [genre.strip() for genre in movie_genres.split(", ")]
             return any(genre in user_genres for genre in movie_genres_list)
 
+        def match_language(movie_language):
+            return movie_language in user_languages
+
         recommendations = df[
             (df['imdb_rating'] >= 7.5) &
             (df['release_year'] >= 2015) &
-            df['genres'].apply(match_genres)
+            df['genres'].apply(match_genres) &
+            df['original_language'].apply(match_language)
         ].sort_values(by='release_date', ascending=False)
     
         if recommendations.empty:
-            print("⚠️ No genre-based matches, using fallback recommendations.")
+            print("⚠️ No genre-language matches, using fallback recommendations.")
             recommendations = df.sort_values(by='vote_average', ascending=False).head(top_n)
 
-        # ✅ Replace `NaN` values to prevent JSON errors
         recommendations = recommendations.fillna({
             "overview": "No description available",
             "imdb_rating": 0,
             "runtime": 0
         })
 
-        # ✅ Debugging check before returning results
-        print(f"🔥 Filtered Recommendations:\n{recommendations[['imdb_id', 'title', 'genres', 'imdb_rating','release_year']].head()}")
+        print(f"🔥 Final Filtered Recommendations:\n{recommendations[['imdb_id', 'title', 'genres', 'original_language', 'imdb_rating','release_year']].head()}")
 
         return recommendations.head(top_n)[['imdb_id', 'title', 'genres', 'original_language', 'overview', 'imdb_rating', 'runtime','release_year']].to_dict(orient='records')
 
     except Exception as e:
         print(f"❌ Error in recommend_movies: {e}")
         return []
+
 
 @app.route('/recommend', methods=['POST'])
 def recommend():
